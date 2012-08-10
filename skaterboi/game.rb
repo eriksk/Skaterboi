@@ -15,10 +15,14 @@ module Skaterboi
 			@city = City.new
 
 			@skater = Skater.new(self)
+
+			@trick_manager = TrickManager.new(self, @skater)
+
 			reset()
 		end
 
 		def reset
+			@trick_manager.reset
 			@skater.set_position(450, 200)
 			@skater.reset
 			@level.reset
@@ -28,6 +32,10 @@ module Skaterboi
 
 		def load_image name
 			Gosu::Image.new(self, "content/gfx/#{name}.png", false)
+		end
+
+		def load_font size
+			Gosu::Font.new(self, Gosu::default_font_name, size)
 		end
 
 		def button_down(id)
@@ -58,6 +66,7 @@ module Skaterboi
 				@skater.lean_right(@dt)
 			end
 			
+			@trick_manager.update @dt
 			@city.update @dt, @skater
 			@skater.update @dt, @level
 			@level.update @dt, @skater
@@ -78,6 +87,7 @@ module Skaterboi
 		def draw_hud
 			@font.draw("x: #{@skater.position.x.to_i}, y: #{@skater.position.y.to_i}", 16, 16, 0)
 			@font.draw("rotation: #{@skater.rotation.radians_to_degrees.to_i}", 16, 32, 0)
+			@trick_manager.draw
 		end
 
 		def draw_bg

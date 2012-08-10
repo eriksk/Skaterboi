@@ -5,4 +5,5 @@ height: 720
 fullscreen: false
 # game logic
 friction: 0.0001
-gravity: 0.001
+gravity: 0.0005
+jump_force: 0.3

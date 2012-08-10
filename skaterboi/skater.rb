@@ -1,18 +1,24 @@
 module Skaterboi
 	class Skater < Entity
 
-		attr_accessor :in_air, :alive
+		attr_accessor :in_air, :alive, :total_rotation
 
 		def initialize game
 			super(game.load_image('skater_2'))
 			@board = game.load_image('board')
+			@on_land_callbacks = []
+		end
+
+		def on_land lmda
+			@on_land_callbacks.push lmda
 		end
 
 		def load
 			@step_speed = 0.01	
-			@jump_force = 0.5
+			@jump_force = CONFIG['jump_force']
 			@lean_speed = 0.00005
 			@rotation_speed = 0.0
+			@total_rotation = 0.0
 
 			@alive = true
 			@in_air = false		
@@ -70,11 +76,16 @@ module Skaterboi
 		def land
 			if @rotation.radians_to_degrees > 90 && @rotation.radians_to_degrees < 270
 				die()
+			else
+				@on_land_callbacks.each do |lmda|
+					lmda.call()
+				end
 			end
 			@in_air = false
 			@velocity.y = 0.0
 			@rotation = 0.0
 			@rotation_speed = 0.0
+			@total_rotation = 0.0
 		end
 
 		def crouch			
@@ -86,6 +97,7 @@ module Skaterboi
 
 			if @in_air
 				@rotation += @rotation_speed * dt
+				@total_rotation += Skaterboi::abs(@rotation_speed * dt)
 				if @rotation.radians_to_degrees < 0
 					@rotation += 360.degrees_to_radians
 				elsif @rotation.radians_to_degrees > 360
