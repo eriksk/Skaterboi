@@ -8,6 +8,9 @@ module Skaterboi
 			@top_color = Gosu::Color::WHITE
 			@bottom_color = Gosu::Color::GRAY		
 
+			@cam = Camera.new(self)
+			@level = Level.new(self)
+
 			@skater = Skater.new(load_image('skater'))
 			@skater.set_position(400, 400)
 		end
@@ -30,7 +33,6 @@ module Skaterboi
 		end
 
 		def update
-			dt = 16.0
 			@dt = 16.0
 
 			if button_down?(Gosu::KbA)
@@ -40,12 +42,18 @@ module Skaterboi
 				@skater.lean_right(@dt)
 			end
 				
-			@skater.update dt
+			@skater.update @dt, @level
+			@level.update @dt, @skater
+			@cam.move(@skater.position.x + CONFIG['width'] * 0.4, @skater.position.y)
+			@cam.update @dt
 		end
 
 		def draw
 			draw_bg
-			@skater.draw
+			@cam.translate{
+				@level.draw
+				@skater.draw
+			}
 		end
 
 		def draw_bg

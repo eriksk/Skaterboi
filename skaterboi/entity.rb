@@ -17,6 +17,19 @@ module Skaterboi
 		def load
 		end
 
+		def left
+			@position.x - @width * @origin.x			
+		end
+		def right
+			@position.x + @width * @origin.x			
+		end
+		def top
+			@position.y - @height * @origin.y			
+		end
+		def bottom
+			@position.y + @height * @origin.y
+		end
+
 		def set_position(x, y)
 		   	@position.x = x
 		    @position.y = y
