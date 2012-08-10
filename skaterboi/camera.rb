@@ -51,9 +51,9 @@ module Skaterboi
 			end
 		end
 
-		def translate(&block)
+		def translate(parallax = 1.0, &block)
 		    # ignore sub-pixel positioning, only integers
-		    @game.translate(-@pos.x.to_i, -@pos.y.to_i) do
+		    @game.translate(-(@pos.x * parallax).to_i, -(@pos.y * parallax).to_i) do
 		            block.call()
 		    end
 		end

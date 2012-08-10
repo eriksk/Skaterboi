@@ -1,7 +1,12 @@
 module Skaterboi
 	class Skater < Entity
 
-		attr_accessor :in_air
+		attr_accessor :in_air, :alive
+
+		def initialize game
+			super(game.load_image('skater_2'))
+			@board = game.load_image('board')
+		end
 
 		def load
 			@step_speed = 0.01	
@@ -9,7 +14,18 @@ module Skaterboi
 			@lean_speed = 0.00005
 			@rotation_speed = 0.0
 
+			@alive = true
 			@in_air = false		
+		end
+
+		def reset
+			@alive = true
+			@velocity.x = 0.0
+			@velocity.y = 0.0
+		end
+
+		def die
+			@alive = false
 		end
 
 		def gas dt
@@ -52,6 +68,9 @@ module Skaterboi
 		end
 
 		def land
+			if @rotation.radians_to_degrees > 90 && @rotation.radians_to_degrees < 270
+				die()
+			end
 			@in_air = false
 			@velocity.y = 0.0
 			@rotation = 0.0
@@ -67,11 +86,19 @@ module Skaterboi
 
 			if @in_air
 				@rotation += @rotation_speed * dt
+				if @rotation.radians_to_degrees < 0
+					@rotation += 360.degrees_to_radians
+				elsif @rotation.radians_to_degrees > 360
+					@rotation -= 360.degrees_to_radians
+				end
+				
 				apply_gravity(dt)
 				level.collides?(@position.x, @position.y + @height / 2.0) do |offset|
-					@position.x += offset.x
 					@position.y += offset.y
-					land()	
+					land()
+					if offset.x != 0 && Skaterboi::abs(offset.y) > 32
+						die()
+					end
 				end
 			else
 				apply_friction(dt)
@@ -92,6 +119,18 @@ module Skaterboi
 					@velocity.x = 0.0
 				end
 			end
+		end
+
+		def draw
+			@texture.draw_rot(@position.x, @position.y, 0, @rotation.radians_to_degrees, @origin.x, @origin.y, @scale, @scale)
+			@board.draw_rot(
+				@position.x + Math::cos(@rotation + 90.degrees_to_radians) * (@width / 2.0), 
+				@position.y + Math::sin(@rotation + 90.degrees_to_radians) * (@height / 2.0), 
+				0, 
+				@rotation.radians_to_degrees, 
+				@origin.x, 
+				@origin.y, 
+				@scale, @scale)
 		end
 	end
 end

@@ -5,14 +5,25 @@ module Skaterboi
 			super(CONFIG['width'], CONFIG['height'], CONFIG['fullscreen'])
 			self.caption = CONFIG['caption']
 			
-			@top_color = Gosu::Color::WHITE
+			@font = Gosu::Font.new(self, Gosu::default_font_name, 18)
+
+			@top_color = Gosu::Color::BLACK
 			@bottom_color = Gosu::Color::GRAY		
 
 			@cam = Camera.new(self)
 			@level = Level.new(self)
+			@city = City.new
 
-			@skater = Skater.new(load_image('skater'))
-			@skater.set_position(400, 400)
+			@skater = Skater.new(self)
+			reset()
+		end
+
+		def reset
+			@skater.set_position(450, 200)
+			@skater.reset
+			@level.reset
+			@city.reset
+			@cam.set_position(@skater.position.x, @skater.position.y)
 		end
 
 		def load_image name
@@ -35,13 +46,19 @@ module Skaterboi
 		def update
 			@dt = 16.0
 
+			if !@skater.alive
+				reset
+				return
+			end
+
 			if button_down?(Gosu::KbA)
 				@skater.lean_left(@dt)	
 			end
 			if button_down?(Gosu::KbD)
 				@skater.lean_right(@dt)
 			end
-				
+			
+			@city.update @dt, @skater
 			@skater.update @dt, @level
 			@level.update @dt, @skater
 			@cam.move(@skater.position.x + CONFIG['width'] * 0.4, @skater.position.y)
@@ -50,10 +67,17 @@ module Skaterboi
 
 		def draw
 			draw_bg
+			#@city.draw(self, @cam)
 			@cam.translate{
 				@level.draw
 				@skater.draw
 			}
+			draw_hud
+		end
+
+		def draw_hud
+			@font.draw("x: #{@skater.position.x.to_i}, y: #{@skater.position.y.to_i}", 16, 16, 0)
+			@font.draw("rotation: #{@skater.rotation.radians_to_degrees.to_i}", 16, 32, 0)
 		end
 
 		def draw_bg

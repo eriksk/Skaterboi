@@ -4,11 +4,16 @@ module Skaterboi
 		def initialize game
 			@game = game
 			@houses = []
+			reset
+		end
+
+		def reset
+			@houses.clear
 			spawn_house(300, 450)
 		end
 
 		def spawn_house x, y
-			h = House.new(Rectangle.new(x, y, 300 + rand() * 1000, 1000), Gosu::Color::GRAY)
+			h = House.new(Rectangle.new(x, y, 800 + rand() * 4000, 1000), Gosu::Color::GRAY)
 			@houses.push(h)
 		end
 
@@ -20,7 +25,7 @@ module Skaterboi
 					if block
 						x_diff = house.rectangle.x - x
 						y_diff = house.rectangle.y - y
-						block.call(Vec2.new(0, y_diff))
+						block.call(Vec2.new(x_diff, y_diff))
 					end
 				end
 			end
@@ -48,6 +53,7 @@ module Skaterboi
 		def draw
 			@houses.each do |house|
 				house.draw(@game)
+				house.draw_windows(@game)
 			end
 		end
 	end

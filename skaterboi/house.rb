@@ -16,6 +16,9 @@ module Skaterboi
 
 		def draw game
 			@rectangle.draw(game, @color)
+		end
+		
+		def draw_windows game
 			window_distance = 64
 			window_size = 32
 			((@rectangle.width / window_distance).to_i - 1).times do |i|
